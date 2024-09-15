@@ -16,7 +16,7 @@ A script that automates the process of setting up unattended security updates on
 
 ## How to Use This Script
 
-You can run this script directly from GitHub or a Gist using this one-liner:
+You can copy this line below run this script directly from a Root shell:
 
 ```bash
 
