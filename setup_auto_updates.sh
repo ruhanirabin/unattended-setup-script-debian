@@ -146,12 +146,12 @@ EOF
 
 # Function to test the configuration
 test_configuration() {
-    echo "Testing unattended-upgrades configuration..."
-    if unattended-upgrades --dry-run >/dev/null 2>&1; then
-        echo "» Success: Unattended-upgrades dry run completed without errors."
+echo "Testing unattended-upgrades configuration..."
+    if output=$(unattended-upgrades --dry-run 2>&1); then
+        echo "Success: Unattended-upgrades dry run completed without errors."
     else
-        echo "× Error: Unattended-upgrades dry run encountered issues. Please check your configuration."
-        echo "You can run 'sudo unattended-upgrades --dry-run --debug' manually for more details."
+        echo "Error: Unattended-upgrades dry run encountered issues. Please check your configuration."
+        echo "You can run 'sudo unattended-upgrades --dry-run' manually for more details."
     fi
 }
 
