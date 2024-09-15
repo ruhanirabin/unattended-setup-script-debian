@@ -45,6 +45,7 @@ check_root() {
 # Function to check if unattended-upgrades is already configured
 check_existing_configuration() {
     if systemctl is-active --quiet unattended-upgrades; then
+        echo ""
         echo "█████████████████████████████████████████████████████"
         echo "██                                                 ██"
         echo "██  Unattended-upgrades service is already active. ██"
@@ -62,7 +63,14 @@ check_existing_configuration() {
                 ;;
         esac
     else
-        echo "░░░ No existing unattended-upgrades configuration detected. Proceeding with setup... "
+        echo ""
+        echo "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+        echo "░░░                                                         ░░░"
+        echo "░░░ No existing unattended-upgrades configuration detected. ░░░"
+        echo "░░░ Proceeding with setup...                                ░░░"
+        echo "░░░                                                         ░░░"
+        echo "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+        echo ""
     fi
 }
 
