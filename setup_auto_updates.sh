@@ -158,25 +158,34 @@ enable_service() {
 # Function to check the status of the service
 check_status() {
     echo "Checking status of unattended-upgrades service:"
-    systemctl is-active --quiet unattended-upgrades
-    active_status=$?
-    systemctl is-enabled --quiet unattended-upgrades
-    enabled_status=$?
+    
+    # Use systemctl show to get all relevant information
+    status_output=$(systemctl show unattended-upgrades --property=ActiveState,SubState,LoadState,UnitFileState)
 
-    if [ $active_status -eq 0 ]; then
-        echo "Service is active (running)"
-    else
-        echo "Service is not active (not running)"
-    fi
+    # Parse and display the output
+    while IFS='=' read -r key value; do
+        case "$key" in
+            "ActiveState")
+                echo "Active State: $value"
+                ;;
+            "SubState")
+                echo "Sub State: $value"
+                ;;
+            "LoadState")
+                echo "Load State: $value"
+                ;;
+            "UnitFileState")
+                echo "Unit File State: $value"
+                ;;
+        esac
+    done <<< "$status_output"
 
-    if [ $enabled_status -eq 0 ]; then
+    # Check if the service is enabled
+    if systemctl is-enabled --quiet unattended-upgrades; then
         echo "Service is enabled (will start on boot)"
     else
         echo "Service is not enabled (won't start on boot)"
     fi
-
-    # Display some additional information without pausing
-    systemctl show unattended-upgrades --property=ActiveState,SubState,LoadState,UnitFileState
 }
 
 # Main function to run all steps
