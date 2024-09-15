@@ -3,7 +3,7 @@
 # Script: Automatic Security Updates Setup for Ubuntu 22.04+ and Debian 12+
 # Version: 2.0
 # Author: Ruhani Rabin
-# Date: $(date +%Y-%m-%d)
+# Date: Sunday, September 15, 2024
 #
 # Description: This script sets up automatic security updates using unattended-upgrades on Ubuntu 22.04+ and Debian 12+.
 # It installs necessary packages, configures unattended-upgrades, and sets up periodic updates.
