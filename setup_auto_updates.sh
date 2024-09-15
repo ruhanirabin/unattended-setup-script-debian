@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script: Automatic Security Updates Setup for Ubuntu 22.04+ and Debian 12+
-# Version: 2.0
+# Version: 2.1
 # Author: Ruhani Rabin
 # Date: Sunday, September 15, 2024
 #
@@ -26,7 +26,7 @@ cat << "EOF"
 EOF
 
 echo "Automatic Security Updates Setup for Ubuntu 22.04+ or Debian 12+"
-echo "Version: 2.0"
+echo "Version: 2.1"
 echo "Author: Ruhani Rabin"
 echo "Date: $(date +%Y-%m-%d)"
 echo
@@ -45,7 +45,12 @@ check_root() {
 # Function to check if unattended-upgrades is already configured
 check_existing_configuration() {
     if systemctl is-active --quiet unattended-upgrades; then
-        echo "███████ Unattended-upgrades service is already active.███████"
+        echo "█████████████████████████████████████████████████████"
+        echo "██                                                 ██"
+        echo "██  Unattended-upgrades service is already active. ██"
+        echo "██                                                 ██"
+        echo "█████████████████████████████████████████████████████"
+        echo ""
         read -p "░░░ Do you want to continue and potentially overwrite existing configurations? (y/N): ░░░" response
         case "$response" in
             [yY][eE][sS]|[yY]) 
