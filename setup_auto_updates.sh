@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script: Automatic Security Updates Setup for Ubuntu 22.04+ and Debian 12+
-# Version: 1.8
+# Version: 2.0
 # Author: Ruhani Rabin
 # Date: $(date +%Y-%m-%d)
 #
@@ -10,6 +10,9 @@
 #
 # WARNING: This script will overwrite existing configuration files. If you have custom configurations,
 # please back them up before running this script.
+
+# Clear the screen
+clear
 
 # Display ASCII art
 cat << "EOF"
@@ -23,7 +26,7 @@ cat << "EOF"
 EOF
 
 echo "Automatic Security Updates Setup for Ubuntu 22.04+ or Debian 12+"
-echo "Version: 1.8"
+echo "Version: 2.0"
 echo "Author: Ruhani Rabin"
 echo "Date: $(date +%Y-%m-%d)"
 echo
@@ -34,7 +37,7 @@ set -e
 # Function to check if the script is run as root
 check_root() {
     if [ "$(id -u)" != "0" ]; then
-        echo "This script must be run as root" 1>&2
+        echo "❌ This script must be run as root" 1>&2
         exit 1
     fi
 }
@@ -42,14 +45,14 @@ check_root() {
 # Function to check if unattended-upgrades is already configured
 check_existing_configuration() {
     if systemctl is-active --quiet unattended-upgrades; then
-        echo "███████ Unattended-upgrades service is already active."
+        echo "███████ Unattended-upgrades service is already active.███████"
         read -p "░░░ Do you want to continue and potentially overwrite existing configurations? (y/N): ░░░" response
         case "$response" in
             [yY][eE][sS]|[yY]) 
-                echo "Proceeding with the setup..."
+                echo "✔ Proceeding with the setup..."
                 ;;
             *)
-                echo "Setup cancelled. Existing configuration will be maintained."
+                echo "❌ Setup cancelled. Existing configuration will be maintained."
                 exit 0
                 ;;
         esac
@@ -63,19 +66,46 @@ prompt_confirmation() {
     read -p "░░░ This script may overwrite existing configurations. Do you want to continue? (y/N): ░░░" response
     case "$response" in
         [yY][eE][sS]|[yY]) 
-            echo "Proceeding with the setup..."
+            echo "✔ Proceeding with the setup..."
             ;;
         *)
-            echo "Setup cancelled."
+            echo "❌ Setup cancelled."
             exit 0
             ;;
     esac
 }
 
+# Function to show spinner
+spinner() {
+    local pid=$1
+    local delay=0.1
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
+
 # Function to install necessary packages
 install_packages() {
-    apt-get update
-    apt-get install unattended-upgrades apt-listchanges -y
+    echo "Updating package lists..."
+    apt-get update > /dev/null 2>&1 &
+    spinner $!
+
+    echo "Installing unattended-upgrades and apt-listchanges..."
+    apt-get install unattended-upgrades apt-listchanges -y > /dev/null 2>&1 &
+    spinner $!
+
+    if [ $? -eq 0 ]; then
+        echo "✔ Packages installed successfully."
+    else
+        echo "❌ Error installing packages. Please check your internet connection and try again."
+        exit 1
+    fi
 }
 
 # Function to detect the distribution
@@ -84,7 +114,7 @@ detect_distribution() {
         . /etc/os-release
         DISTRO=$ID
     else
-        echo "Unable to detect distribution. Exiting."
+        echo "❌ Unable to detect distribution. Exiting."
         exit 1
     fi
 }
@@ -113,7 +143,7 @@ Unattended-Upgrade::Allowed-Origins {
 };
 EOF
     else
-        echo "Unsupported distribution: $DISTRO. Exiting."
+        echo "❌ Unsupported distribution: $DISTRO. Exiting."
         exit 1
     fi
 
@@ -148,17 +178,35 @@ EOF
 test_configuration() {
 echo "Testing unattended-upgrades configuration..."
     if output=$(unattended-upgrades --dry-run 2>&1); then
-        echo "Success: Unattended-upgrades dry run completed without errors."
+        echo "✔ Success: Unattended-upgrades dry run completed without errors."
     else
-        echo "Error: Unattended-upgrades dry run encountered issues. Please check your configuration."
+        echo "❌ Error: Unattended-upgrades dry run encountered issues. Please check your configuration."
         echo "You can run 'sudo unattended-upgrades --dry-run' manually for more details."
     fi
 }
 
-# Function to enable and start the service
+# Function to enable and start the service with spinner
 enable_service() {
-    systemctl enable unattended-upgrades
-    systemctl start unattended-upgrades
+    echo "Enabling and starting unattended upgrades service..."
+    
+    # Start the service in the background
+    (systemctl enable unattended-upgrades && systemctl start unattended-upgrades) > /dev/null 2>&1 &
+    
+    # Get the PID of the background process
+    local pid=$!
+    
+    # Show spinner while the service is being enabled and started
+    spinner $pid
+    
+    # Wait for the background process to finish
+    wait $pid
+    
+    # Check if the service was successfully enabled and started
+    if systemctl is-active --quiet unattended-upgrades; then
+        echo "✔ Unattended upgrades service has been successfully enabled and started."
+    else
+        echo "❌ Failed to enable and start unattended upgrades service. Please check system logs for details."
+    fi
 }
 
 # Function to check the status of the service
@@ -188,9 +236,9 @@ check_status() {
 
     # Check if the service is enabled
     if systemctl is-enabled --quiet unattended-upgrades; then
-        echo "Ø Service is enabled (will start on boot) Ø"
+        echo "✔ Service is enabled (will start on boot)"
     else
-        echo "× Service is not enabled (won't start on boot) ×"
+        echo "❌ Service is not enabled (won't start on boot)"
     fi
 }
 
@@ -211,4 +259,4 @@ main() {
 # Run the main function
 main
 
-echo "» Automatic security updates setup complete!"
+echo "✔ Automatic security updates setup complete!"
