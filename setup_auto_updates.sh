@@ -146,7 +146,13 @@ EOF
 
 # Function to test the configuration
 test_configuration() {
-    unattended-upgrades --dry-run --debug
+    echo "Testing unattended-upgrades configuration..."
+    if unattended-upgrades --dry-run >/dev/null 2>&1; then
+        echo "» Success: Unattended-upgrades dry run completed without errors."
+    else
+        echo "× Error: Unattended-upgrades dry run encountered issues. Please check your configuration."
+        echo "You can run 'sudo unattended-upgrades --dry-run --debug' manually for more details."
+    fi
 }
 
 # Function to enable and start the service
