@@ -20,7 +20,7 @@ You can run this script directly from GitHub or a Gist using this one-liner:
 
 ```bash
 
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/username/repo/main/setup_auto_updates.sh)"
+sudo bash -c "$(curl -fsSL https://github.com/ruhanirabin/unattended-setup-script-debian/raw/main/setup_auto_updates.sh)"
 ```
 
 ## Important Notes
