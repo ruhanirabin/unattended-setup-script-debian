@@ -49,7 +49,7 @@ check_existing_configuration() {
         read -p "░░░ Do you want to continue and potentially overwrite existing configurations? (y/N): ░░░" response
         case "$response" in
             [yY][eE][sS]|[yY]) 
-                echo "✔ Proceeding with the setup..."
+                echo "✓ Proceeding with the setup..."
                 ;;
             *)
                 echo "❌ Setup cancelled. Existing configuration will be maintained."
@@ -66,7 +66,7 @@ prompt_confirmation() {
     read -p "░░░ This script may overwrite existing configurations. Do you want to continue? (y/N): ░░░" response
     case "$response" in
         [yY][eE][sS]|[yY]) 
-            echo "✔ Proceeding with the setup..."
+            echo "✓ Proceeding with the setup..."
             ;;
         *)
             echo "❌ Setup cancelled."
@@ -101,7 +101,7 @@ install_packages() {
     spinner $!
 
     if [ $? -eq 0 ]; then
-        echo "✔ Packages installed successfully."
+        echo "✓ Packages installed successfully."
     else
         echo "❌ Error installing packages. Please check your internet connection and try again."
         exit 1
@@ -178,7 +178,7 @@ EOF
 test_configuration() {
 echo "Testing unattended-upgrades configuration..."
     if output=$(unattended-upgrades --dry-run 2>&1); then
-        echo "✔ Success: Unattended-upgrades dry run completed without errors."
+        echo "✓ Success: Unattended-upgrades dry run completed without errors."
     else
         echo "❌ Error: Unattended-upgrades dry run encountered issues. Please check your configuration."
         echo "You can run 'sudo unattended-upgrades --dry-run' manually for more details."
@@ -203,7 +203,7 @@ enable_service() {
     
     # Check if the service was successfully enabled and started
     if systemctl is-active --quiet unattended-upgrades; then
-        echo "✔ Unattended upgrades service has been successfully enabled and started."
+        echo "✓ Unattended upgrades service has been successfully enabled and started."
     else
         echo "❌ Failed to enable and start unattended upgrades service. Please check system logs for details."
     fi
@@ -236,7 +236,7 @@ check_status() {
 
     # Check if the service is enabled
     if systemctl is-enabled --quiet unattended-upgrades; then
-        echo "✔ Service is enabled (will start on boot)"
+        echo "✓ Service is enabled (will start on boot)"
     else
         echo "❌ Service is not enabled (won't start on boot)"
     fi
@@ -259,4 +259,4 @@ main() {
 # Run the main function
 main
 
-echo "✔ Automatic security updates setup complete!"
+echo "✓ Automatic security updates setup complete!"
