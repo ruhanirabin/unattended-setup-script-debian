@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script: Automatic Security Updates Setup for Ubuntu 22.04+ and Debian 12+
-# Version: 1.5
+# Version: 1.6
 # Author: Ruhani Rabin
 # Date: $(date +%Y-%m-%d)
 #
@@ -23,7 +23,7 @@ cat << "EOF"
 EOF
 
 echo "Automatic Security Updates Setup for Ubuntu 22.04+ or Debian 12+"
-echo "Version: 1.5"
+echo "Version: 1.6"
 echo "Author: Ruhani Rabin"
 echo "Date: $(date +%Y-%m-%d)"
 echo
@@ -42,8 +42,8 @@ check_root() {
 # Function to check if unattended-upgrades is already configured
 check_existing_configuration() {
     if systemctl is-active --quiet unattended-upgrades; then
-        echo "Unattended-upgrades service is already active."
-        read -p "Do you want to continue and potentially overwrite existing configurations? (y/N): " response
+        echo "███████ Unattended-upgrades service is already active."
+        read -p "░░░ Do you want to continue and potentially overwrite existing configurations? (y/N): ░░░" response
         case "$response" in
             [yY][eE][sS]|[yY]) 
                 echo "Proceeding with the setup..."
@@ -54,13 +54,13 @@ check_existing_configuration() {
                 ;;
         esac
     else
-        echo "No existing unattended-upgrades configuration detected. Proceeding with setup..."
+        echo "░░░ No existing unattended-upgrades configuration detected. Proceeding with setup... "
     fi
 }
 
 # Function to prompt for confirmation
 prompt_confirmation() {
-    read -p "This script may overwrite existing configurations. Do you want to continue? (y/N): " response
+    read -p "░░░ This script may overwrite existing configurations. Do you want to continue? (y/N): ░░░" response
     case "$response" in
         [yY][eE][sS]|[yY]) 
             echo "Proceeding with the setup..."
@@ -166,25 +166,25 @@ check_status() {
     while IFS='=' read -r key value; do
         case "$key" in
             "ActiveState")
-                echo "Active State: $value"
+                echo "» Active State: $value"
                 ;;
             "SubState")
-                echo "Sub State: $value"
+                echo "» Sub State: $value"
                 ;;
             "LoadState")
-                echo "Load State: $value"
+                echo "» Load State: $value"
                 ;;
             "UnitFileState")
-                echo "Unit File State: $value"
+                echo "» Unit File State: $value"
                 ;;
         esac
     done <<< "$status_output"
 
     # Check if the service is enabled
     if systemctl is-enabled --quiet unattended-upgrades; then
-        echo "Service is enabled (will start on boot)"
+        echo "Ø Service is enabled (will start on boot) Ø"
     else
-        echo "Service is not enabled (won't start on boot)"
+        echo "× Service is not enabled (won't start on boot) ×"
     fi
 }
 
@@ -205,4 +205,4 @@ main() {
 # Run the main function
 main
 
-echo "Automatic security updates setup complete!"
+echo "» Automatic security updates setup complete!"
