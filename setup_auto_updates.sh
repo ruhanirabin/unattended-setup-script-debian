@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script: Automatic Security Updates Setup for Ubuntu 22.04+ and Debian 12+
-# Version: 2.1
+# Version: 2.2
 # Author: Ruhani Rabin
 # Date: Sunday, September 15, 2024
 #
@@ -26,7 +26,7 @@ cat << "EOF"
 EOF
 
 echo "Automatic Security Updates Setup for Ubuntu 22.04+ or Debian 12+"
-echo "Version: 2.1"
+echo "Version: 2.2"
 echo "Author: Ruhani Rabin"
 echo "Date: $(date +%Y-%m-%d)"
 echo
@@ -88,30 +88,37 @@ prompt_confirmation() {
     esac
 }
 
-# Function to show spinner
-spinner() {
+# Function to show animated progress bar
+progress_bar() {
     local pid=$1
-    local delay=0.1
-    local spinstr='|/-\'
+    local duration=$2
+    local width=40
+    local bar_char="█"
+    local empty_char="░"
+    local percent=0
+
+    echo -n "Progress: "
+
     while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
+        local filled=$(( width * percent / 100 ))
+        local empty=$(( width - filled ))
+        printf "\r[%-*s%-*s] %3d%%" "$filled" "${bar_char:0:filled}" "$empty" "${empty_char:0:empty}" "$percent"
+        percent=$(( (percent + 1) % 101 ))
+        sleep 0.1
     done
-    printf "    \b\b\b\b"
+
+    printf "\r[%-*s] 100%%\n" "$width" "${bar_char:0:width}"
 }
 
 # Function to install necessary packages
 install_packages() {
     echo "Updating package lists..."
     apt-get update > /dev/null 2>&1 &
-    spinner $!
+    progress_bar $! 5
 
     echo "Installing unattended-upgrades and apt-listchanges..."
     apt-get install unattended-upgrades apt-listchanges -y > /dev/null 2>&1 &
-    spinner $!
+    progress_bar $! 10
 
     if [ $? -eq 0 ]; then
         echo "✓ Packages installed successfully."
@@ -198,7 +205,7 @@ echo "Testing unattended-upgrades configuration..."
     fi
 }
 
-# Function to enable and start the service with spinner
+# Function to enable and start the service with progress bar
 enable_service() {
     echo "Enabling and starting unattended upgrades service..."
     
@@ -208,8 +215,8 @@ enable_service() {
     # Get the PID of the background process
     local pid=$!
     
-    # Show spinner while the service is being enabled and started
-    spinner $pid
+    # Show progress bar while the service is being enabled and started
+    progress_bar $pid 5
     
     # Wait for the background process to finish
     wait $pid
