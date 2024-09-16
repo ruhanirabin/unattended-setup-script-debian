@@ -22,6 +22,10 @@ You can copy this line below run this script directly from a Root shell:
 sudo bash -c "$(curl -fsSL https://github.com/ruhanirabin/unattended-setup-script-debian/raw/main/setup_auto_updates.sh)"
 ```
 
+## Screenshot
+![automatic-unattended-security-updates-setup-screenshot](https://github.com/user-attachments/assets/15da9528-58e8-4a80-a70a-10541c9ffc06)
+
+
 ## Important Notes
 
 - This script will overwrite existing configuration files. If you have custom configurations, back them up before running this script.
