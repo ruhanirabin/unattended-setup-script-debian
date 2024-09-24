@@ -1,6 +1,6 @@
 # Automatic unattended security updates setup for ubuntu 22+ or debian 12+ - shell script
 
-A script that automates the process of setting up unattended security updates on Ubuntu 22.04 and newer versions. This script ensures your system stays secure by automatically installing important security updates.
+A script that automates the process of setting up unattended security updates on Ubuntu 22.04+/Debian 12+ and newer versions. This script ensures your system stays secure by **automatically installing important security updates**.
 
 ## What Does This Script Do?
 
@@ -15,7 +15,7 @@ A script that automates the process of setting up unattended security updates on
 
 ## How to Use This Script
 
-You can copy this line below run this script directly from a Root shell:
+You can copy this line below run this script directly from a **Root** shell:
 
 ```bash
 
