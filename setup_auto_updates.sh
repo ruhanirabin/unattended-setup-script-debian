@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Script: Automatic Security Updates Setup for Ubuntu 22.04+ and Debian 12+
-# Version: 2.2
+# Version: 2.3
 # Author: Ruhani Rabin
-# Date: Sunday, September 15, 2024
+# Date: Sunday, September 25, 2024
 #
 # Description: This script sets up automatic security updates using unattended-upgrades on Ubuntu 22.04+ and Debian 12+.
 # It installs necessary packages, configures unattended-upgrades, and sets up periodic updates.
@@ -14,7 +14,7 @@
 # Clear the screen
 clear
 
-# Display ASCII art
+# ASCII art ;)
 cat << "EOF"
 ██╗   ██╗ █████╗     ███████╗███████╗████████╗██╗   ██╗██████╗ 
 ██║   ██║██╔══██╗    ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
@@ -34,7 +34,7 @@ echo
 # Exit on any error
 set -e
 
-# Function to check if the script is run as root
+# check if the script is run as root
 check_root() {
     if [ "$(id -u)" != "0" ]; then
         echo "❌ This script must be run as root" 1>&2
@@ -42,7 +42,7 @@ check_root() {
     fi
 }
 
-# Function to check if unattended-upgrades is already configured
+# check if unattended-upgrades is already configured
 check_existing_configuration() {
     if systemctl is-active --quiet unattended-upgrades; then
         echo ""
@@ -74,7 +74,7 @@ check_existing_configuration() {
     fi
 }
 
-# Function to prompt for confirmation
+# prompt for confirmation
 prompt_confirmation() {
     read -p "░░░ This script may overwrite existing configurations. Do you want to continue? (y/N): ░░░" response
     case "$response" in
@@ -88,7 +88,7 @@ prompt_confirmation() {
     esac
 }
 
-# Function to show animated progress bar
+# somewhat animated progress bar
 progress_bar() {
     local pid=$1
     local duration=$2
@@ -110,7 +110,7 @@ progress_bar() {
     printf "\r[%-*s] 100%%\n" "$width" "${bar_char:0:width}"
 }
 
-# Function to install necessary packages
+# install necessary packages
 install_packages() {
     echo "Updating package lists..."
     apt-get update > /dev/null 2>&1 &
@@ -128,7 +128,7 @@ install_packages() {
     fi
 }
 
-# Function to detect the distribution
+# detect the distribution
 detect_distribution() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -139,7 +139,7 @@ detect_distribution() {
     fi
 }
 
-# Function to configure unattended-upgrades
+# configure unattended-upgrades
 configure_unattended_upgrades() {
     detect_distribution
 
@@ -167,7 +167,7 @@ EOF
         exit 1
     fi
 
-    # Common configuration for both distributions
+    # Common for both distributions
     cat >> /etc/apt/apt.conf.d/50unattended-upgrades << EOF
 Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
@@ -175,7 +175,7 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
 EOF
 }
 
-# Function to configure automatic upgrades
+# configure automatic upgrades
 configure_auto_upgrades() {
     cat > /etc/apt/apt.conf.d/20auto-upgrades << EOF
 APT::Periodic::Update-Package-Lists "1";
@@ -184,7 +184,7 @@ APT::Periodic::AutocleanInterval "7";
 EOF
 }
 
-# Function to configure update intervals and behaviors
+# configure update intervals and behaviors
 configure_periodic() {
     cat > /etc/apt/apt.conf.d/10periodic << EOF
 APT::Periodic::Update-Package-Lists "1";
@@ -194,7 +194,7 @@ APT::Periodic::Unattended-Upgrade "1";
 EOF
 }
 
-# Function to test the configuration
+# test the configuration
 test_configuration() {
 echo "Testing unattended-upgrades configuration..."
     if output=$(unattended-upgrades --dry-run 2>&1); then
@@ -205,11 +205,10 @@ echo "Testing unattended-upgrades configuration..."
     fi
 }
 
-# Function to enable and start the service with progress bar
+# enable and start the service with progress bar
 enable_service() {
     echo "Enabling and starting unattended upgrades service..."
     
-    # Start the service in the background
     (systemctl enable unattended-upgrades && systemctl start unattended-upgrades) > /dev/null 2>&1 &
     
     # Get the PID of the background process
@@ -218,7 +217,7 @@ enable_service() {
     # Show progress bar while the service is being enabled and started
     progress_bar $pid 5
     
-    # Wait for the background process to finish
+    # Waitbackground process to finish
     wait $pid
     
     # Check if the service was successfully enabled and started
@@ -229,14 +228,12 @@ enable_service() {
     fi
 }
 
-# Function to check the status of the service
+# check the status of the service
 check_status() {
     echo "Checking status of unattended-upgrades service:"
     
-    # Use systemctl show to get all relevant information
     status_output=$(systemctl show unattended-upgrades --property=ActiveState,SubState,LoadState,UnitFileState)
 
-    # Parse and display the output
     while IFS='=' read -r key value; do
         case "$key" in
             "ActiveState")
@@ -254,7 +251,7 @@ check_status() {
         esac
     done <<< "$status_output"
 
-    # Check if the service is enabled
+    # is this enabled? 
     if systemctl is-enabled --quiet unattended-upgrades; then
         echo "✓ Service is enabled (will start on boot)"
     else
@@ -276,7 +273,7 @@ main() {
     check_status
 }
 
-# Run the main function
+# Call the main function
 main
 
 echo "✓ Automatic security updates setup complete!"
