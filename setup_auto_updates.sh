@@ -26,7 +26,7 @@ cat << "EOF"
 EOF
 
 echo "Automatic Security Updates Setup for Ubuntu 22.04+ or Debian 12+"
-echo "Version: 2.2"
+echo "Version: 2.3"
 echo "Author: Ruhani Rabin"
 echo "Date: $(date +%Y-%m-%d)"
 echo
