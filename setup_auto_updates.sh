@@ -26,6 +26,9 @@ cat << "EOF"
 EOF
 
 echo "Automatic Security Updates Setup for Ubuntu 22.04+ or Debian 12+"
+echo ""
+echo "This unattended security setup only needs one time setup"
+echo ""
 echo "Version: 2.3"
 echo "Author: Ruhani Rabin"
 echo "Date: $(date +%Y-%m-%d)"
