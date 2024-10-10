@@ -33,3 +33,7 @@ sudo bash -c "$(curl -fsSL https://github.com/ruhanirabin/unattended-setup-scrip
 - After setting up automatic updates, monitor your system to ensure it's functioning as expected.
 
 By using this script, you can quickly and easily set up automatic security updates on your Ubuntu 22.04+ or Debian 12 system, helping to keep it secure with minimal manual intervention.
+
+## Changelog
+*2024 Oct 10*
+-- Removed typical updates and only kept security updates

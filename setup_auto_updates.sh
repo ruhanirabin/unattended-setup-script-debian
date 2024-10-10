@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Script: Automatic Security Updates Setup for Ubuntu 22.04+ and Debian 12+
-# Version: 2.3
+# Version: 2.4.0
 # Author: Ruhani Rabin
-# Date: Sunday, September 25, 2024
+# Date: Sunday, Sep 10, 2024
 #
 # Description: This script sets up automatic security updates using unattended-upgrades on Ubuntu 22.04+ and Debian 12+.
 # It installs necessary packages, configures unattended-upgrades, and sets up periodic updates.
@@ -16,22 +16,23 @@ clear
 
 # ASCII art ;)
 cat << "EOF"
-██╗   ██╗ █████╗     ███████╗███████╗████████╗██╗   ██╗██████╗ 
-██║   ██║██╔══██╗    ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
-██║   ██║███████║    ███████╗█████╗     ██║   ██║   ██║██████╔╝
-██║   ██║██╔══██║    ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝ 
-╚██████╔╝██║  ██║    ███████║███████╗   ██║   ╚██████╔╝██║     
- ╚═════╝ ╚═╝  ╚═╝    ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝     
-                                                              
+                                                                       
+ █████╗ ███████╗██╗   ██╗    ███████╗███████╗████████╗██╗   ██╗██████╗ 
+██╔══██╗██╔════╝██║   ██║    ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
+███████║███████╗██║   ██║    ███████╗█████╗     ██║   ██║   ██║██████╔╝
+██╔══██║╚════██║██║   ██║    ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝ 
+██║  ██║███████║╚██████╔╝    ███████║███████╗   ██║   ╚██████╔╝██║     
+╚═╝  ╚═╝╚══════╝ ╚═════╝     ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝     
+                                                                       
 EOF
 
 echo "Automatic Security Updates Setup for Ubuntu 22.04+ or Debian 12+"
 echo ""
 echo "This unattended security setup only needs one time setup"
 echo ""
-echo "Version: 2.3"
+echo "Version: 2.4.0"
 echo "Author: Ruhani Rabin"
-echo "Date: $(date +%Y-%m-%d)"
+echo "Script Date: Oct 10, 2024"
 echo
 
 # Exit on any error
@@ -150,7 +151,7 @@ configure_unattended_upgrades() {
         cat > /etc/apt/apt.conf.d/50unattended-upgrades << EOF
 Unattended-Upgrade::Allowed-Origins {
     "\${distro_id}:\${distro_codename}-security";
-    "\${distro_id}:\${distro_codename}-updates";
+//    "\${distro_id}:\${distro_codename}-updates";
 };
 EOF
     elif [ "$DISTRO" = "debian" ]; then
@@ -160,7 +161,7 @@ Unattended-Upgrade::Allowed-Origins {
         "\${distro_id}:\${distro_codename}-security";
         "\${distro_id}ESMApps:\${distro_codename}-apps-security";
         "\${distro_id}ESM:\${distro_codename}-infra-security";
-        "\${distro_id}:\${distro_codename}-updates";
+//        "\${distro_id}:\${distro_codename}-updates";
 //      "\${distro_id}:\${distro_codename}-proposed";
 //      "\${distro_id}:\${distro_codename}-backports";
 };
