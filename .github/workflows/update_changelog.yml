@@ -3,7 +3,9 @@ name: Update Changelog
 on:
   push:
     branches:
-      - main  # or your default branch name
+      - main
+    paths-ignore:
+      - 'README.md'
 
 jobs:
   update-changelog:
@@ -12,8 +14,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        fetch-depth: 0  # Fetch all history for all tags and branches
-        token: ${{ secrets.PAT }}
+        fetch-depth: 0
 
     - name: Set up Git
       run: |
@@ -22,46 +23,39 @@ jobs:
 
     - name: Update Changelog
       run: |
+        # Extract version from setup_auto_updates.sh
+        NEW_VERSION=$(grep -oP '(?<=# Version: ).*' setup_auto_updates.sh)
+        
+        # Check if this version already has a tag
+        if git rev-parse $NEW_VERSION >/dev/null 2>&1; then
+          echo "Version $NEW_VERSION already tagged. Skipping changelog update."
+          exit 0
+        fi
+
         # Get the current date
         CURRENT_DATE=$(date "+%Y %b %d")
-        
-        # Get the latest version tag or use a default if no tags exist
-        NEW_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.0")
         
         # Get the latest commit message
         COMMIT_MSG=$(git log -1 --pretty=%B)
         
-        # Check if the commit message starts with "//**"
-        if [[ ! $COMMIT_MSG =~ ^//\*\* ]]; then
-          # Update the README.md file with the new changelog entry
-          awk -v date="$CURRENT_DATE" -v version="$NEW_VERSION" -v msg="$COMMIT_MSG" '
-          /^## Changelog/ {
-            print
-            print "\n### " date " - Version " version
-            print "\n-- " msg
-            print ""
-            next
-          }
-          {print}
-          ' README.md > README.tmp && mv README.tmp README.md
-          
-          # Check if there are changes to commit
-          if git diff --exit-code README.md; then
-            echo "No changes to commit."
-          else
-            # Commit and push the updated README.md
-            git add README.md
-            git commit -m "Update changelog for $NEW_VERSION"
-            git push https://${{ secrets.PAT }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
-          fi
-        else
-          echo "Commit message starts with '//**'. Skipping changelog update."
+        # Check if the commit message starts with "//**" or is about updating the changelog
+        if [[ $COMMIT_MSG =~ ^//\*\* || $COMMIT_MSG == "Update changelog for"* ]]; then
+          echo "Skipping changelog update due to commit message."
+          exit 0
         fi
 
-    - name: Create/Update Tag
-      run: |
-        NEW_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.0")
-        if ! git rev-parse $NEW_VERSION >/dev/null 2>&1; then
+        # Check if entry already exists and update README.md
+        if ! grep -q "### .* - Version $NEW_VERSION" README.md; then
+          sed -i "/^## Changelog/a \\\n### $CURRENT_DATE - Version $NEW_VERSION\n\n-- $COMMIT_MSG\n" README.md
+          
+          # Commit and push the updated README.md
+          git add README.md
+          git commit -m "Update changelog for $NEW_VERSION"
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
+          
+          # Create new tag
           git tag $NEW_VERSION
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git $NEW_VERSION
+        else
+          echo "Changelog entry for version $NEW_VERSION already exists. Skipping update."
         fi
-        git push https://${{ secrets.PAT }}@github.com/${{ github.repository }}.git $NEW_VERSION || echo "Tag $NEW_VERSION already exists on remote"
