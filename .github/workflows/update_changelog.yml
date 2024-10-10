@@ -1,0 +1,63 @@
+name: Update Changelog
+
+on:
+  push:
+    branches:
+      - main  # or your default branch name
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch all history for all tags and branches
+
+    - name: Set up Git
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+
+    - name: Update Changelog
+      run: |
+        # Get the current date
+        CURRENT_DATE=$(date "+%Y %b %d")
+        
+        # Get the latest version tag
+        NEW_VERSION=$(git describe --tags --abbrev=0)
+        
+        # Get the latest commit message
+        COMMIT_MSG=$(git log -1 --pretty=%B)
+        
+        # Check if the commit message starts with "//**"
+        if [[ ! $COMMIT_MSG =~ ^//\*\* ]]; then
+          # Update the README.md file with the new changelog entry
+          awk -v date="$CURRENT_DATE" -v version="$NEW_VERSION" -v msg="$COMMIT_MSG" '
+          /^## Changelog/ {
+            print
+            print "\n### " date " - Version " version
+            print "\n-- " msg
+            print ""
+            next
+          }
+          {print}
+          ' README.md > README.tmp && mv README.tmp README.md
+          
+          # Check if there are changes to commit
+          if git diff --exit-code README.md; then
+            echo "No changes to commit."
+          else
+            # Commit and push the updated README.md
+            git add README.md
+            git commit -m "Update changelog for $NEW_VERSION"
+            git push
+          fi
+        else
+          echo "Commit message starts with '//**'. Skipping changelog update."
+        fi
+
+    - name: Create/Update Tag
+      run: |
+        NEW_VERSION=$(git describe --tags --abbrev=0)
+        git push origin $NEW_VERSION
