@@ -175,6 +175,7 @@ EOF
     fi
 
     # Common for both distributions
+    
     cat >> /etc/apt/apt.conf.d/50unattended-upgrades << EOF
 Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
@@ -183,6 +184,7 @@ EOF
 }
 
 # configure automatic upgrades
+
 configure_auto_upgrades() {
     cat > /etc/apt/apt.conf.d/20auto-upgrades << EOF
 APT::Periodic::Update-Package-Lists "1";
