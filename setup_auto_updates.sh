@@ -13,7 +13,7 @@
 # WARNING: This script will overwrite existing configuration files. If you have custom configurations,
 # please back them up before running this script.
 #
-# Now added pre commit automations for script and readme.md
+# Now added pre commit automations for script and readme.md with pre commit and git actions
 
 clear
 
