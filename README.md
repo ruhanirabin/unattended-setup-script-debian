@@ -38,7 +38,7 @@ By using this script, you can quickly and easily set up automatic security updat
 
 ### 2024 Oct 10 - Version 2.4.2
 
--- Checkign if pre commit is doing the version update.
+-- Script cleanup - more instructions where needed. Versions will upgrade incrementally for each commit. Added some github hooks as well.
 
 ### 2024 Oct 10 Version: 2.4.1
 

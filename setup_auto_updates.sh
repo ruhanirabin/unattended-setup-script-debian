@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script: Automatic Security Updates Setup for Ubuntu 22.04+ and Debian 12+
-# Version: 2.4.2
+# Version: 2.4.3
 # Author: Ruhani Rabin
 # Script Date: 2024 Oct 10
 #
@@ -33,7 +33,7 @@ echo "Automatic Security Updates Setup for Ubuntu 22.04+ or Debian 12+"
 echo ""
 echo "This unattended security setup only needs one time setup"
 echo ""
-echo "Version: 2.4.2"
+echo "Version: 2.4.3"
 echo "Author: Ruhani Rabin"
 echo "Script Date: 2024 Oct 10"
 echo
