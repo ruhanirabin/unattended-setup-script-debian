@@ -63,6 +63,11 @@ By using this script, you can quickly and easily set up automatic security updat
 
 ### 2024 Oct 10 - Version v0.1.0
 
+-- Update changelog for v0.1.0
+
+
+### 2024 Oct 10 - Version v0.1.0
+
 -- Update update_changelog.yml
 
 
