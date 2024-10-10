@@ -36,6 +36,11 @@ By using this script, you can quickly and easily set up automatic security updat
 
 ## Changelog
 
+### 2024 Oct 10 - Version v0.1.0
+
+-- Update update_changelog.yml
+
+
 ### 2024 Oct 10 - Version 2.4.2
 
 -- Script cleanup - more instructions where needed. Versions will upgrade incrementally for each commit. Added some github hooks as well.
