@@ -1,5 +1,10 @@
 # AGENTS.md — AI Assistant Context
 
+## Skills
+This project includes agent-agnostic skills in the `skills/` directory.
+Any AI assistant should parse files there for specialized task instructions.
+- `skills/release.md` — Release preparation workflow
+
 ## Project
 - `setup_auto_updates.sh` automates unattended security updates on Ubuntu (24.04+) and Debian (13+).
 - Installs/configures `unattended-upgrades`, sets periodic schedules, enables systemd service.
