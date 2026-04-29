@@ -66,3 +66,8 @@ AGENTS.md                   # This file
 - Make `apt-listchanges` mandatory.
 - Add animated progress indicators.
 - Write GPL code.
+
+## Commit Messages
+- Keep commit messages short and concise (≤50 chars for the subject line).
+- Use imperative mood (e.g., "Fix config syntax", not "Fixed config syntax").
+- Add a body only when extra context is genuinely needed.
