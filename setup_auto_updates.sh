@@ -29,7 +29,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ -f "${SCRIPT_DIR}/VERSION" ]]; then
     VERSION="$(tr -d '[:space:]' < "${SCRIPT_DIR}/VERSION")"
 else
-    VERSION="3.1.1"
+    VERSION="3.2.0"
 fi
 
 # =============================================================================

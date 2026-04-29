@@ -1,7 +1,7 @@
 # Automatic Security Updates Setup Script
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.1.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](CHANGELOG.md)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20%7C%2024.10%20%7C%2025.04%20%7C%2025.10%20%7C%2026.04%20%7C%2026.10-E95420)](#)
 [![Debian](https://img.shields.io/badge/Debian-13%20%7C%2014%20%7C%20Sid-A81D33)](#)
 
