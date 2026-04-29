@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths-ignore:
+      - 'CHANGELOG.md'
       - 'README.md'
 
 jobs:
@@ -12,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
         token: ${{ secrets.PAT }}
@@ -26,39 +27,46 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.PAT }}
       run: |
-        # Extract version from setup_auto_updates.sh
-        NEW_VERSION=$(grep -oP '(?<=# Version: ).*' setup_auto_updates.sh)
-        
+        # Extract version from setup_auto_updates.sh (single source of truth)
+        NEW_VERSION=$(grep -oP '(?<=^VERSION=")[^"]+' setup_auto_updates.sh)
+
+        if [[ -z "$NEW_VERSION" ]]; then
+          echo "ERROR: Could not extract VERSION from setup_auto_updates.sh"
+          exit 1
+        fi
+
+        echo "Extracted version: $NEW_VERSION"
+
         # Check if this version already has a tag
-        if git rev-parse $NEW_VERSION >/dev/null 2>&1; then
+        if git rev-parse "$NEW_VERSION" >/dev/null 2>&1; then
           echo "Version $NEW_VERSION already tagged. Skipping changelog update."
           exit 0
         fi
 
         # Get the current date
-        CURRENT_DATE=$(date "+%Y %b %d")
-        
-        # Get the latest commit message
+        CURRENT_DATE=$(date "+%Y-%m-%d")
+
+        # Get the latest commit message (skip changelog-update commits)
         COMMIT_MSG=$(git log -1 --pretty=%B)
-        
-        # Check if the commit message starts with "//**" or is about updating the changelog
-        if [[ $COMMIT_MSG =~ ^//\*\* || $COMMIT_MSG == "Update changelog for"* ]]; then
-          echo "Skipping changelog update due to commit message."
+
+        if [[ $COMMIT_MSG == "Update changelog for"* ]]; then
+          echo "Skipping: commit is a changelog update."
           exit 0
         fi
 
-        # Check if entry already exists and update README.md
-        if ! grep -q "### .* - Version $NEW_VERSION" README.md; then
-          sed -i "/^## Changelog/a \\\n### $CURRENT_DATE - Version $NEW_VERSION\n\n-- $COMMIT_MSG\n" README.md
-          
-          # Commit and push the updated README.md
-          git add README.md
+        # Update CHANGELOG.md if entry doesn't exist
+        if ! grep -q "## \[$NEW_VERSION\]" CHANGELOG.md; then
+          sed -i "s/## \[Unreleased\]/## [Unreleased]\n\n## [$NEW_VERSION] - $CURRENT_DATE\n\n### Added\n\n- $COMMIT_MSG/" CHANGELOG.md
+
+          git add CHANGELOG.md
           git commit -m "Update changelog for $NEW_VERSION"
           git push https://$GH_TOKEN@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
-          
+
           # Create new tag
-          git tag $NEW_VERSION
-          git push https://$GH_TOKEN@github.com/${{ github.repository }}.git $NEW_VERSION
+          git tag "$NEW_VERSION"
+          git push https://$GH_TOKEN@github.com/${{ github.repository }}.git "$NEW_VERSION"
+
+          echo "CHANGELOG.md updated and tagged $NEW_VERSION"
         else
-          echo "Changelog entry for version $NEW_VERSION already exists. Skipping update."
+          echo "Changelog entry for version $NEW_VERSION already exists."
         fi
