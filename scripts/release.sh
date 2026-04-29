@@ -46,8 +46,8 @@ command -v git >/dev/null 2>&1 || error "git is required"
 [[ -x "$BUMP_SCRIPT" ]] || error "bump-version.sh not found or not executable"
 [[ -x "$VALIDATE_SCRIPT" ]] || error "validate-version.sh not found or not executable"
 
-# Check for uncommitted changes
-if ! git -C "$PROJECT_ROOT" diff-index --quiet HEAD --; then
+# Check for uncommitted changes (use --porcelain for reliable detection on Windows)
+if [[ -n "$(git -C "$PROJECT_ROOT" status --porcelain)" ]]; then
     error "There are uncommitted changes. Please commit or stash them before releasing."
 fi
 
