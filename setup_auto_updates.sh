@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # Script: Automatic Security Updates Setup
-# Version: 3.1.1
+# Version: see VERSION file (fallback embedded for standalone use)
 # Author: Ruhani Rabin
 # License: MIT
 # Description: Sets up automatic security updates using unattended-upgrades
@@ -23,7 +23,14 @@ set -o pipefail
 # =============================================================================
 # SINGLE SOURCE-OF-TRUTH VERSION
 # =============================================================================
-VERSION="3.1.0"
+# Read from VERSION file when running from the repository; fallback to embedded
+# version for standalone downloads (curl | bash).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "${SCRIPT_DIR}/VERSION" ]]; then
+    VERSION="$(tr -d '[:space:]' < "${SCRIPT_DIR}/VERSION")"
+else
+    VERSION="3.1.1"
+fi
 
 # =============================================================================
 # GLOBALS
@@ -326,6 +333,14 @@ detect_distribution() {
     DISTRO_CODENAME="${VERSION_CODENAME:-}"
     DISTRO_NAME="${NAME:-Unknown}"
 
+    # Explicitly reject desktop-oriented distributions
+    local id_like="${ID_LIKE:-}"
+    if [[ "$DISTRO_ID" == "linuxmint" ]] || [[ "$id_like" == *"linuxmint"* ]]; then
+        log_error "Linux Mint and other desktop-oriented distributions are not supported."
+        log_error "This script is designed for server environments (Ubuntu 24.04+ / Debian 13+)."
+        exit 1
+    fi
+
     log_info "Detected: ${DISTRO_NAME} ${DISTRO_VERSION_ID} (${DISTRO_CODENAME})"
     log_debug "ID=${DISTRO_ID}, VERSION_ID=${DISTRO_VERSION_ID}, CODENAME=${DISTRO_CODENAME}"
 
@@ -433,7 +448,7 @@ files_differ() {
     if [[ ! -f "$file" ]]; then
         return 0
     fi
-    if echo "$new_content" | diff -q - "$file" >/dev/null 2>&1; then
+    if printf '%s\n' "$new_content" | diff -q - "$file" >/dev/null 2>&1; then
         return 1
     fi
     return 0
@@ -448,7 +463,10 @@ backup_config() {
 
     if [[ -f "$target" ]]; then
         local backup="${target}.${BACKUP_SUFFIX}"
-        cp -p "$target" "$backup"
+        if ! cp -p "$target" "$backup"; then
+            log_error "Failed to backup ${target}"
+            exit 1
+        fi
         log_info "Backed up ${target} -> ${backup}"
         if [[ "$QUIET" -eq 0 ]]; then
             echo "  Backed up: ${file} -> ${file}.${BACKUP_SUFFIX}"
@@ -485,7 +503,7 @@ install_packages() {
     fi
     log_info "Package lists updated successfully"
 
-    if dpkg -l | grep -q "^ii  unattended-upgrades"; then
+    if dpkg-query -W -f='${Status}' unattended-upgrades 2>/dev/null | grep -q "install ok installed"; then
         log_info "unattended-upgrades is already installed"
     else
         if [[ "$QUIET" -eq 0 ]]; then

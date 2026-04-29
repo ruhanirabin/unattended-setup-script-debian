@@ -1,4 +1,9 @@
 ---
+- name: Verify target is a supported server distribution
+  ansible.builtin.fail:
+    msg: "Linux Mint and other desktop-oriented distributions are not supported. This role is designed for server environments (Ubuntu 24.04+ / Debian 13+)."
+  when: ansible_distribution == 'Linux Mint' or 'linuxmint' in ansible_distribution_release | default('')
+
 - name: Update apt cache
   ansible.builtin.apt:
     update_cache: true

@@ -24,15 +24,14 @@ ansible/
   playbooks/
     site.yml                # Sample Ansible playbook
   roles/unattended_updates/ # Ansible role
-.github/workflows/
-  update_changelog.yml
 ```
 
 ## Conventions
 
 ### VERSION
-- `VERSION="3.1.0"` at top of script is single source of truth.
-- Derive all version refs from it; never hardcode elsewhere.
+- `VERSION` is stored in the `VERSION` file in the project root — the single source of truth.
+- `setup_auto_updates.sh` reads from this file at runtime; a fallback embedded version supports standalone downloads.
+- Never hardcode versions in other files; update only via `scripts/bump-version.sh` during the release process.
 
 ### Logging
 - Functions: `log_info`, `log_warn`, `log_error`, `log_debug`.
@@ -85,10 +84,13 @@ ansible/
 - Targets Ubuntu 24.04+ / Debian 13+; manual testing requires Linux.
 - Use `--dry-run` for no-side-effect validation.
 - `shellcheck` recommended.
-- GitHub workflow runs on `ubuntu-latest`.
 
 ## Dependencies
 - `bash` 4.0+, `systemctl`, `apt-get`, `unattended-upgrades`.
+
+## Windows Development Note
+- All build / release / validation scripts in `scripts/` are written in bash and **must** be run with bash (Git Bash, WSL, or MSYS2).
+- On Windows, always prefix with `bash` (e.g., `bash scripts/validate-version.sh`).
 
 ## Do NOT
 - Add `set -e` (use traps).

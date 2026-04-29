@@ -28,7 +28,6 @@ sudo bash setup_auto_updates.sh --yes
 ## Requirements
 
 - **Root access** (sudo or root user)
-- **Root access** (sudo or root user)
 - **Internet connectivity** for package installation
 - Minimum **50 MB** free disk space
 
