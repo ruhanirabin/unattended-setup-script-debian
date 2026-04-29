@@ -1,0 +1,88 @@
+# =============================================================================
+#  Line Endings & Cross-Platform Handling
+# =============================================================================
+
+# Auto-detect text files and normalize line endings to LF on checkout
+* text=auto
+
+# Shell scripts must always use LF (Unix line endings) even on Windows
+*.sh        text eol=lf
+*.bash      text eol=lf
+*.zsh       text eol=lf
+*.fish      text eol=lf
+
+# Ansible / YAML / Config files — normalize to LF
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.json      text eol=lf
+*.toml      text eol=lf
+*.ini       text eol=lf
+*.cfg       text eol=lf
+*.conf      text eol=lf
+
+# Documentation — normalize to LF
+*.md        text eol=lf
+*.txt       text eol=lf
+*.rst       text eol=lf
+
+# Web / Source files — normalize to LF
+*.js        text eol=lf
+*.ts        text eol=lf
+*.css       text eol=lf
+*.html      text eol=lf
+*.xml       text eol=lf
+
+# Build / CI files — normalize to LF
+*.py        text eol=lf
+*.rb        text eol=lf
+*.pl        text eol=lf
+Makefile    text eol=lf
+makefile    text eol=lf
+Dockerfile  text eol=lf
+
+# Git files — treat as text but let Git handle them
+.gitattributes text
+.gitignore     text
+
+# =============================================================================
+#  Binary Files — Do Not Modify Line Endings
+# =============================================================================
+
+# Images
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.svg       text
+
+# Archives
+*.zip       binary
+*.tar       binary
+*.tar.gz    binary
+*.tgz       binary
+*.rar       binary
+*.7z        binary
+
+# Executables / Libraries
+*.exe       binary
+*.dll       binary
+*.so        binary
+*.dylib     binary
+*.bin       binary
+
+# Documents
+*.pdf       binary
+*.doc       binary
+*.docx      binary
+*.xls       binary
+*.xlsx      binary
+*.ppt       binary
+*.pptx      binary
+
+# Fonts
+*.ttf       binary
+*.otf       binary
+*.woff      binary
+*.woff2     binary
+*.eot       binary
