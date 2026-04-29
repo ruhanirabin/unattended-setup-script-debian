@@ -1,0 +1,12 @@
+---
+- name: Unattended Security Updates Setup
+  hosts: all
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: unattended_updates
+      vars:
+        unattended_updates_auto_reboot: false
+        unattended_updates_auto_reboot_time: "02:00"
+        unattended_updates_log_file: "/var/log/ansible-unattended-setup.log"

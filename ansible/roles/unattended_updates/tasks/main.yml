@@ -1,0 +1,62 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  register: apt_cache_update
+  retries: 3
+  delay: 10
+  until: apt_cache_update is succeeded
+
+- name: Install unattended-upgrades package
+  ansible.builtin.apt:
+    name: unattended-upgrades
+    state: present
+  register: pkg_install
+
+- name: Ensure apt config directory exists
+  ansible.builtin.file:
+    path: /etc/apt/apt.conf.d
+    state: directory
+    mode: '0755'
+
+- name: Deploy 50unattended-upgrades configuration
+  ansible.builtin.template:
+    src: 50unattended-upgrades.j2
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  notify: Restart unattended-upgrades
+  register: config_50
+
+- name: Deploy 20auto-upgrades configuration
+  ansible.builtin.template:
+    src: 20auto-upgrades.j2
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  notify: Restart unattended-upgrades
+  register: config_20
+
+- name: Enable and start unattended-upgrades service
+  ansible.builtin.systemd:
+    name: unattended-upgrades
+    enabled: true
+    state: started
+  when: ansible_service_mgr == 'systemd'
+  register: svc_state
+
+- name: Verify unattended-upgrades dry-run
+  ansible.builtin.command: unattended-upgrades --dry-run
+  register: dry_run_result
+  changed_when: false
+  failed_when: dry_run_result.rc != 0 and 'No packages found' not in dry_run_result.stdout
+  ignore_errors: true
+
+- name: Display dry-run result
+  ansible.builtin.debug:
+    msg: "unattended-upgrades dry-run: {{ 'OK' if dry_run_result.rc == 0 else 'WARNING (non-fatal)' }}"

@@ -1,0 +1,35 @@
+---
+# Default variables for unattended_updates role
+
+# Enable automatic reboot after updates that require it (e.g., kernel)
+unattended_updates_auto_reboot: false
+
+# Time to schedule automatic reboot (24h format, e.g., "02:00")
+unattended_updates_auto_reboot_time: "02:00"
+
+# Reboot even if users are logged in
+unattended_updates_auto_reboot_with_users: false
+
+# Enable development release upgrades (dangerous — keep false)
+unattended_updates_dev_release: "false"
+
+# Allowed origins — security only by default
+unattended_updates_allowed_origins:
+  - "${distro_id}:${distro_codename}"
+  - "${distro_id}:${distro_codename}-security"
+  - "${distro_id}ESMApps:${distro_codename}-apps-security"
+  - "${distro_id}ESM:${distro_codename}-infra-security"
+
+# Debian uses Origins-Pattern instead of Allowed-Origins
+unattended_updates_origins_pattern:
+  - "origin=Debian,codename={{ ansible_distribution_release }},label=Debian"
+  - "origin=Debian,codename={{ ansible_distribution_release }},label=Debian-Security"
+  - "origin=Debian,codename={{ ansible_distribution_release }}-security,label=Debian-Security"
+
+# APT periodic schedule
+unattended_updates_periodic_update_package_lists: "1"
+unattended_updates_periodic_unattended_upgrade: "1"
+unattended_updates_periodic_autoclean_interval: "7"
+
+# Logging
+unattended_updates_log_file: "/var/log/ansible-unattended-setup.log"

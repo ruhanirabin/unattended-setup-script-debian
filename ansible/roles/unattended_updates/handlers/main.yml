@@ -1,0 +1,6 @@
+---
+- name: Restart unattended-upgrades service
+  ansible.builtin.systemd:
+    name: unattended-upgrades
+    state: restarted
+  when: ansible_service_mgr == 'systemd'
