@@ -1,7 +1,7 @@
 # Automatic Security Updates Setup Script
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](CHANGELOG.md)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20%7C%2024.10%20%7C%2025.04%20%7C%2025.10%20%7C%2026.04%20%7C%2026.10-E95420)](#)
 [![Debian](https://img.shields.io/badge/Debian-13%20%7C%2014%20%7C%20Sid-A81D33)](#)
 
@@ -28,9 +28,11 @@ sudo bash setup_auto_updates.sh --yes
 ## Requirements
 
 - **Root access** (sudo or root user)
-- **Systemd-based** Linux distribution
+- **Root access** (sudo or root user)
 - **Internet connectivity** for package installation
 - Minimum **50 MB** free disk space
+
+> **Container note:** The script detects the absence of systemd and skips service enablement, but still writes configuration files. You can use cron or a container-native scheduler instead.
 
 ---
 
@@ -101,6 +103,14 @@ sudo bash setup_auto_updates.sh --yes --verbose
 
 Enables detailed debug output on stdout and in the log file.
 
+### Quiet Mode (CI/CD / Ansible)
+
+```bash
+sudo bash setup_auto_updates.sh --yes --quiet
+```
+
+Minimal output: only errors and the final `STATUS: CHANGED` or `STATUS: UNCHANGED` marker.
+
 ### Custom Log File
 
 ```bash
@@ -113,9 +123,73 @@ sudo bash setup_auto_updates.sh --log-file /var/log/my-setup.log
 |---|---|
 | `-y`, `--yes` | Skip all confirmation prompts |
 | `-n`, `--dry-run` | Validate only, no changes |
+| `-q`, `--quiet` | Minimal output (errors + status only) |
 | `-v`, `--verbose` | Enable debug output |
 | `-l`, `--log-file <path>` | Set custom log file path |
 | `-h`, `--help` | Show help and exit |
+
+---
+
+## Automation & Idempotency
+
+The script is designed to be **idempotent** — running it multiple times is safe and will not duplicate work:
+
+- Package installation skips if already present
+- Config files are compared before writing; unchanged files are left alone
+- Service enablement only reports a change if it was not previously enabled
+- **Final output** includes a status marker for automation tools:
+  - `STATUS: CHANGED` — something was modified
+  - `STATUS: UNCHANGED` — everything was already up to date
+
+Use `--quiet` with `--yes` for Ansible, Packer, cloud-init, or CI/CD pipelines.
+
+---
+
+## Ansible Integration
+
+A ready-to-use Ansible role and playbook are included in the `ansible/` directory.
+
+### Quick Start
+
+```bash
+cd ansible
+ansible-playbook -i inventory.ini playbook.yml
+```
+
+### Role Variables
+
+See `ansible/roles/unattended_updates/defaults/main.yml` for all configurable options:
+
+| Variable | Default | Description |
+|---|---|---|
+| `unattended_updates_auto_reboot` | `false` | Reboot automatically if required |
+| `unattended_updates_auto_reboot_time` | `"02:00"` | Reboot schedule (24h format) |
+| `unattended_updates_auto_reboot_with_users` | `false` | Reboot even if users are logged in |
+| `unattended_updates_periodic_update_package_lists` | `"1"` | Days between package list updates |
+| `unattended_updates_periodic_unattended_upgrade` | `"1"` | Days between unattended upgrades |
+| `unattended_updates_periodic_autoclean_interval` | `"7"` | Days between autoclean runs |
+
+### Ansible Semaphore
+
+This repository is compatible with [Ansible Semaphore](https://www.semui.co/):
+
+1. Add this repository as a **Task Template** source in Semaphore
+2. Use `ansible/playbook.yml` as the playbook path
+3. Set the inventory to your target hosts
+4. The role handles Ubuntu/Debian detection automatically
+
+### Using the Script Directly in Ansible
+
+If you prefer using the shell script inside an Ansible task:
+
+```yaml
+- name: Set up unattended security updates
+  ansible.builtin.script: setup_auto_updates.sh
+  args:
+    creates: /etc/apt/apt.conf.d/50unattended-upgrades
+  register: unattended_setup
+  changed_when: "'STATUS: CHANGED' in unattended_setup.stdout"
+```
 
 ---
 
@@ -235,6 +309,23 @@ ls -la /etc/apt/apt.conf.d/ | grep -E '(10periodic|20auto|50unattended)'
 ```
 
 The script backs up existing files with a `.bak.<timestamp>` suffix.
+
+### "Another instance is already running" error
+
+The script uses a lock file (`/var/run/setup_auto_updates.sh.lock`) to prevent concurrent runs. If a previous run crashed without cleaning up:
+
+```bash
+sudo rm -f /var/run/setup_auto_updates.sh.lock
+```
+
+### Running in Docker / containers
+
+The script detects the absence of systemd and skips service management. Configuration files are still written. To run unattended-upgrades in a container, use cron instead:
+
+```bash
+apt-get install -y cron
+(crontab -l 2>/dev/null; echo "0 6 * * * /usr/bin/unattended-upgrade --dry-run") | crontab -
+```
 
 ### Reverting changes
 

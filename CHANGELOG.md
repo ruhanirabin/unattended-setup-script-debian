@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-04-29
+
+### Added
+- `--quiet`/`-q` flag for minimal output (CI/CD / Ansible-friendly)
+- Idempotency tracking with `STATUS: CHANGED` / `STATUS: UNCHANGED` output
+- Systemd detection — skips service management in containers without systemd
+- APT lock wait (up to 5 min) to avoid failures when another apt process is running
+- Concurrent run protection via `/var/run/setup_auto_updates.sh.lock`
+- `set -o pipefail` for safer pipelines
+- Sample Ansible role and playbook in `ansible/` directory
+- Ansible Semaphore-compatible template variables for auto-reboot and schedule
+
+### Changed
+- Package installation is now idempotent (skips if already installed)
+- Configuration files only rewritten when content differs (idempotent writes)
+- Service enable only marks changed if it was not previously enabled
+- `cleanup()` trap now removes lock file on exit
+
+### Fixed
+- Container environments no longer fail due to missing systemd
+- Concurrent apt processes no longer cause immediate script failure
+
 ## [3.0.0] - 2026-04-29
 
 ### Added
