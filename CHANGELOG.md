@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-04-29
+
+### Added
+- `ansible/ansible.cfg` with standard defaults (`become`, `forks`, `interpreter_python`)
+- `ansible/inventory/hosts.yml` sample YAML inventory
+- `ansible/playbooks/site.yml` as the new playbook entry point
+
+### Changed
+- Restructured `ansible/` directory to standard layout (`inventory/`, `playbooks/`, `roles/`)
+- Expanded README Ansible Integration section with inventory setup, group/host vars, run examples, override patterns, Semaphore/AWX steps, cron automation, and shell-script alternative
+- Updated AGENTS.md file tree to reflect new `ansible/` layout
+
 ## [3.1.0] - 2026-04-29
 
 ### Added

@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # Script: Automatic Security Updates Setup
-# Version: 3.1.0
+# Version: 3.1.1
 # Author: Ruhani Rabin
 # License: MIT
 # Description: Sets up automatic security updates using unattended-upgrades

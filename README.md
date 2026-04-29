@@ -1,7 +1,7 @@
 # Automatic Security Updates Setup Script
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.1.1-blue.svg)](CHANGELOG.md)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20%7C%2024.10%20%7C%2025.04%20%7C%2025.10%20%7C%2026.04%20%7C%2026.10-E95420)](#)
 [![Debian](https://img.shields.io/badge/Debian-13%20%7C%2014%20%7C%20Sid-A81D33)](#)
 
@@ -147,44 +147,204 @@ Use `--quiet` with `--yes` for Ansible, Packer, cloud-init, or CI/CD pipelines.
 
 ## Ansible Integration
 
-A ready-to-use Ansible role and playbook are included in the `ansible/` directory.
+A ready-to-use Ansible role, sample inventory, and playbook are included in the `ansible/` directory. The layout follows standard Ansible conventions so it can be run manually, via cron, or imported into tools like Ansible Semaphore / AWX.
 
-### Quick Start
+### Directory Layout
+
+```
+ansible/
+├── ansible.cfg                 # Ansible settings (become, inventory path, forks)
+├── inventory/
+│   └── hosts.yml               # Sample YAML inventory
+├── playbooks/
+│   └── site.yml                # Main entry-point playbook
+└── roles/
+    └── unattended_updates/
+        ├── defaults/main.yml   # Default variables (safe to override)
+        ├── handlers/main.yml   # Service restart handler
+        ├── tasks/main.yml      # Role tasks
+        └── templates/
+            ├── 20auto-upgrades.j2
+            └── 50unattended-upgrades.j2
+```
+
+### Prerequisites
+
+- **Ansible 2.15+** on the control node.
+- **SSH key-based access** (or password with `ansible_ssh_pass`) to target hosts.
+- **Sudo / root** privileges on targets (`become: true` is set in `ansible.cfg`).
+- Targets must run **Ubuntu 24.04+** or **Debian 13+**.
+
+### Inventory Setup
+
+The included `inventory/hosts.yml` is a minimal example. Adapt it to your environment:
+
+```yaml
+all:
+  children:
+    homelab:
+      vars:
+        ansible_user: root
+      hosts:
+        node-02-web:
+          ansible_host: 192.168.68.10
+        node-02-db:
+          ansible_host: 192.168.68.11
+    vps:
+      vars:
+        ansible_user: root
+      hosts:
+        vps-hermes:
+          ansible_host: 203.0.113.5
+```
+
+You can also use a static INI file if you prefer:
+
+```ini
+[homelab]
+node-02-web ansible_host=192.168.68.10 ansible_user=root
+node-02-db  ansible_host=192.168.68.11 ansible_user=root
+
+[vps]
+vps-hermes ansible_host=203.0.113.5 ansible_user=root
+```
+
+#### Group / Host Variables
+
+Place overrides under `inventory/group_vars/` or `inventory/host_vars/` so they are automatically loaded:
+
+```yaml
+# inventory/group_vars/homelab.yml
+---
+unattended_updates_auto_reboot: true
+unattended_updates_auto_reboot_time: "00:30"
+```
+
+```yaml
+# inventory/host_vars/vps-hermes.yml
+---
+unattended_updates_auto_reboot: false
+```
+
+### Running the Playbook
+
+#### Basic Deploy (All Hosts)
 
 ```bash
 cd ansible
-ansible-playbook -i inventory.ini playbook.yml
+ansible-playbook playbooks/site.yml
+```
+
+#### Check Mode (Dry Run)
+
+```bash
+ansible-playbook playbooks/site.yml --check --diff
+```
+
+#### Limit to a Group or Single Host
+
+```bash
+ansible-playbook playbooks/site.yml --limit homelab
+ansible-playbook playbooks/site.yml --limit node-02-web
+```
+
+#### Verbose Output
+
+```bash
+ansible-playbook playbooks/site.yml -v
+ansible-playbook playbooks/site.yml -vvv   # Debug-level
+```
+
+#### Custom Inventory File
+
+```bash
+ansible-playbook playbooks/site.yml -i /path/to/your/inventory.yml
 ```
 
 ### Role Variables
 
-See `ansible/roles/unattended_updates/defaults/main.yml` for all configurable options:
+All variables are defined in `ansible/roles/unattended_updates/defaults/main.yml`. Override them at the playbook, inventory, group_vars, or command-line level.
 
 | Variable | Default | Description |
 |---|---|---|
-| `unattended_updates_auto_reboot` | `false` | Reboot automatically if required |
-| `unattended_updates_auto_reboot_time` | `"02:00"` | Reboot schedule (24h format) |
-| `unattended_updates_auto_reboot_with_users` | `false` | Reboot even if users are logged in |
-| `unattended_updates_periodic_update_package_lists` | `"1"` | Days between package list updates |
-| `unattended_updates_periodic_unattended_upgrade` | `"1"` | Days between unattended upgrades |
-| `unattended_updates_periodic_autoclean_interval` | `"7"` | Days between autoclean runs |
+| `unattended_updates_auto_reboot` | `false` | Reboot automatically if a kernel or critical update requires it |
+| `unattended_updates_auto_reboot_time` | `"02:00"` | Reboot schedule in 24-hour format |
+| `unattended_updates_auto_reboot_with_users` | `false` | Reboot even when users are logged in |
+| `unattended_updates_dev_release` | `"false"` | Allow development release upgrades (keep `false`) |
+| `unattended_updates_periodic_update_package_lists` | `"1"` | Days between `apt update` runs (`1` = daily) |
+| `unattended_updates_periodic_unattended_upgrade` | `"1"` | Days between unattended upgrade runs |
+| `unattended_updates_periodic_autoclean_interval` | `"7"` | Days between `apt autoremove` / `autoclean` runs |
+| `unattended_updates_log_file` | `"/var/log/ansible-unattended-setup.log"` | Path for the role’s internal log |
 
-### Ansible Semaphore
+#### Override Examples
 
-This repository is compatible with [Ansible Semaphore](https://www.semui.co/):
+**Inside the playbook:**
 
-1. Add this repository as a **Task Template** source in Semaphore
-2. Use `ansible/playbook.yml` as the playbook path
-3. Set the inventory to your target hosts
-4. The role handles Ubuntu/Debian detection automatically
+```yaml
+---
+- name: Configure automatic security updates
+  hosts: all
+  become: true
+  roles:
+    - role: unattended_updates
+      vars:
+        unattended_updates_auto_reboot: true
+        unattended_updates_auto_reboot_time: "00:30"
+```
 
-### Using the Script Directly in Ansible
+**On the command line:**
 
-If you prefer using the shell script inside an Ansible task:
+```bash
+ansible-playbook playbooks/site.yml \
+  -e "unattended_updates_auto_reboot=true" \
+  -e "unattended_updates_auto_reboot_time=04:00"
+```
+
+### Idempotency
+
+The role is fully idempotent:
+- APT cache is only updated if older than 1 hour.
+- Configuration files are backed up before changes.
+- The systemd service is restarted only when configs change (handler).
+- The dry-run step reports `changed_when: false` and is allowed to fail gracefully on systems with no pending updates.
+
+### Ansible Semaphore / AWX
+
+This repository is compatible with [Ansible Semaphore](https://www.semui.co/) and Red Hat Ansible Automation Platform:
+
+1. Add this repository as a **Project** / **Task Template** source.
+2. Set the playbook path to `ansible/playbooks/site.yml`.
+3. Point the inventory to your own inventory file or use the sample at `ansible/inventory/hosts.yml`.
+4. The role automatically detects Ubuntu vs Debian and applies the correct origin patterns.
+
+### Cron Automation (Control Node)
+
+Run the playbook automatically from your control node at midnight:
+
+```cron
+0 0 * * * cd /opt/unattended-setup-script-debian/ansible && \
+  git pull origin main >/dev/null 2>&1 && \
+  ansible-playbook playbooks/site.yml >> /var/log/ansible-nightly.log 2>&1
+```
+
+### Using the Shell Script Directly in Ansible
+
+If you prefer invoking the shell script instead of the role:
 
 ```yaml
 - name: Set up unattended security updates
-  ansible.builtin.script: setup_auto_updates.sh
+  ansible.builtin.script: ../setup_auto_updates.sh
+  args:
+    creates: /etc/apt/apt.conf.d/50unattended-upgrades
+  register: unattended_setup
+  changed_when: "'STATUS: CHANGED' in unattended_setup.stdout"
+```
+
+For non-interactive execution, pass `--yes`:
+
+```yaml
+- name: Set up unattended security updates (non-interactive)
+  ansible.builtin.command: "bash {{ playbook_dir }}/../setup_auto_updates.sh --yes --quiet"
   args:
     creates: /etc/apt/apt.conf.d/50unattended-upgrades
   register: unattended_setup

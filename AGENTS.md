@@ -18,7 +18,11 @@ CHANGELOG.md                # Keep a Changelog format
 LICENSE
 AGENTS.md                   # This file
 ansible/
-  playbook.yml              # Sample Ansible playbook
+  ansible.cfg               # Ansible configuration
+  inventory/
+    hosts.yml               # Sample inventory
+  playbooks/
+    site.yml                # Sample Ansible playbook
   roles/unattended_updates/ # Ansible role
 .github/workflows/
   update_changelog.yml
